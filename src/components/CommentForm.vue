@@ -128,7 +128,7 @@ export default {
       }
     },
     changeFile(e) {
-      uploadFile(e, this.core);
+      uploadFile(e, this.core, this.$toasted);
     },
   },
 };

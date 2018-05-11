@@ -1,7 +1,6 @@
 import { scrollIntoLastElement } from './utils';
 
-export const uploadFile = (e, core, file) => {
-  const vm = this;
+export const uploadFile = (e, core, toasted) => {
   const files = e.target.files || e.dataTransfer.files;
   const formData = new FormData();
   const roomId = core.selected.id;
@@ -12,7 +11,7 @@ export const uploadFile = (e, core, file) => {
   let ext = files[0].name.split('.');
   ext = ext[ext.length - 1] || null;
   if (core.allowedFileTypes && core.allowedFileTypes.indexOf(ext) < 0) {
-    return vm.$toasted.error('File uploading failed');
+    return toasted.error('File uploading failed');
   }
 
   // all clear, let's upload
@@ -44,10 +43,14 @@ export const uploadFile = (e, core, file) => {
           window.setTimeout(() => scrollIntoLastElement(core), 0);
         });
     } else {
-      vm.$toasted.error('File uploading failed');
+      toasted.error('File uploading failed');
       core.removeUploadedFile(files[0].name, roomId);
     }
   };
+  xhr.onerror = function() {
+    toasted.error('File uploading failed');
+    core.removeUploadedFile(files[0].name, roomId);
+  }
   xhr.send(formData);
   return true;
 }
@@ -60,7 +63,7 @@ export const updateProgress = (e, fileName, core) => {
     if (fileObject) fileObject.progress = Math.round(percentComplete * 100);
     // console.log('%s', fileObject.progress);
   } else {
-    console.log('unkown');
+    console.log('unknown');
   }
 }
 

@@ -1,19 +1,13 @@
 <template lang="pug">
-  div.qcw-comments
+  div.qcw-comments(@scroll="onScroll($event)"
+    ref="scrollTarget"
+    @dragenter="onDragging(true)"
+    :class="{'isReading': isReading}")
     div.inner
       div.qcw-load-comment-indicator(v-if="core.isLoading")
         loader()
 
-      file-drag-drop(
-        :core="core"
-        :dragging="dragging"
-        @onDragging="onDragging"
-      )
-
-      ul(
-        v-if="core.selected"
-        @dragenter="dragging=true"
-      )
+      ul(v-if="core.selected")
         li(class="qcw-load-more qcw-load-more-btn" @click="loadMore" v-if="comments.length > 0 && comments[0].before_id > 0")
           icon(name="ic-load" class="ic-load-more__state" v-if="isLoadingMore")
           span Load More
@@ -31,6 +25,7 @@
             :showAvatar="core.options.avatar"
             :currentMenuId="currentMenuId"
             @onChangeMenu="onChangeMenu"
+            ref="comment"
           )
         //- component for uploader progress
 
@@ -40,25 +35,25 @@
 import Icon from './Icon';
 import Loader from './Loader';
 import Comment from './Comment';
-import FileDragDrop from './FileDragDrop';
 import { scrollIntoLastElement } from '../lib/utils';
 
 export default {
-  name: 'Comments',
-  components: { Icon, Loader, Comment, FileDragDrop },
+  name: 'CommentList',
+  components: { Icon, Loader, Comment },
   props: ['core', 'onClickImage', 'onupdate', 'replyHandler'],
+  data() {
+    return {
+      isLoadingMore: false,
+      isReading: false,
+      commentLength: 0,
+      currentMenuId: null,
+      timeoutId: -1,
+    };
+  },
   computed: {
     comments() {
       return this.core.selected.comments;
     },
-  },
-  data() {
-    return {
-      isLoadingMore: false,
-      commentLength: 0,
-      currentMenuId: null,
-      dragging: false,
-    };
   },
   updated() {
     if (this.core.selected) {
@@ -67,29 +62,26 @@ export default {
         const lastComment = this.comments[lastCommentIndex];
         this.core.readComment(this.core.selected.id, lastComment.id);
         this.commentLength = this.comments.length;
-        if (!this.core.UI.isReading) scrollIntoLastElement(this.core);
+        if (!this.isReading) scrollIntoLastElement(this.core);
       }
     }
   },
-  mounted() {
-    const self = this;
-    // attach scroll listener
-    const scrollContainer = document.querySelector('.qcw-comments');
-    if (scrollContainer != null) {
-      scrollContainer.onscroll = () => {
-        const scrollHeight =  scrollContainer.scrollHeight;
-        const clientHeight = scrollContainer.clientHeight;
-        const scrollTop = scrollContainer.scrollTop;
-        const scrollTreshold = 2.3 * clientHeight;
-        if (scrollHeight - scrollTop > scrollTreshold) {
-          self.core.UI.isReading = true;
-        } else {
-          self.core.UI.isReading = false;
-        }
-      };
-    }
-  },
   methods: {
+    onScroll(event) {
+      if (this.timeoutId !== -1) {
+        window.clearTimeout(this.timeoutId);
+      }
+      this.timeoutId = window.setTimeout(() => {
+        const $element = event.target;
+        const scrollHeight = $element.scrollHeight;
+        const clientHeight = $element.clientHeight;
+        const scrollTop = $element.scrollTop;
+        const scrollTreshold = 1.2 * clientHeight;
+        const calculation = scrollHeight - scrollTop;
+        this.isReading = calculation > scrollTreshold;
+        this.timeoutId = -1;
+      }, 300);
+    },
     loadMore() {
       this.isLoadingMore = true;
       this.core.loadMore(this.comments[0].id).then(() => {
@@ -100,7 +92,7 @@ export default {
       this.currentMenuId = id;
     },
     onDragging(status) {
-      this.dragging = status;
+      this.$emit('onDragging', status);
     },
   },
 };

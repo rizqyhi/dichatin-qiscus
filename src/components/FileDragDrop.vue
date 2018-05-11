@@ -6,7 +6,7 @@
       @dragleave="onDragging(false)"
     )
     .qcw-dropzone-text
-      span.qcw-dropzone-title {{ title || 'Drag and Drop file here for upload...' }}
+      span.qcw-dropzone-title {{ title || 'Drag file here for upload...' }}
     |
     input(type="file", @change="changeFile")
 </template>
@@ -21,7 +21,7 @@ export default {
   props: ['title', 'core', 'dragging'],
   methods: {
     changeFile(e) {
-      uploadFile(e, this.core);
+      uploadFile(e, this.core, this.$toasted);
       this.onDragging(false);
     },
     onDragging(status) {
@@ -41,22 +41,33 @@ $bgContent = $darkerWhite;
 
 .qcw-dropzone-area
   display flex
-  justify-content center
   align-items center
-  width $width
-  height 100%
+  justify-content center
   position absolute
-  overflow hidden
-  background transparent
+  bottom 0
+  left auto
+  border 3px dashed $mediumGrey
+  height calc(100% - 73px)
+  width 100%
+  background $darkWhite
+  z-index 5
+  border-bottom-left-radius 20px
+  border-bottom-right-radius 20px
   opacity 0
+  visibility hidden
+  transition all 0.3s ease-out
   &.qcw-dropzone-over
-    background $bgContent
     opacity 1
-    z-index 3
-    position fixed
-    height $height
-    .qcw-dropzone-text
-      position fixed
+    visibility visible
+    animation fadeInUp 0.3s ease-out
+
+  .qcw-dropzone-text
+    top 50%
+    text-align center
+    transform translate(0, -50%)
+    font-size 20px
+    font-weight 600
+    color $mediumGrey
   input
     position absolute
     cursor pointer
@@ -68,36 +79,7 @@ $bgContent = $darkerWhite;
     height 100%
     opacity 0
 
-.qcw-dropzone-text
-  position absolute
-  top 60%
-  text-align center
-  transform translate(0, -50%)
-  width $width
-  height $height
-  display flex
-  justify-content center
-  align-items center
-  span
-    display block
-    font-family Arial, Helvetica
-    line-height 1.9
-    
-.qcw-dropzone-title
-  font-size $fontSizeTitle
-  color $fontColorTitle
-  letter-spacing 0.4px
-
 .qcw-container.qcw-container--wide
   .qcw-dropzone-area
-    width 100%
-    opacity 0
-    &.qcw-dropzone-over
-      background $bgContent
-      opacity 1
-      height calc(100% - 135px)
-      position fixed
-
-  .qcw-dropzone-text
-    top 50%
+    border-radius 0
 </style>

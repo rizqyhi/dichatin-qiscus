@@ -37,12 +37,9 @@
             v-click-outside="onClickMenuOutside"
             )
             ul
-              li
-                span(@click="replyHandler(comment)") Reply
-              li
-                span(@click="confirmDeleteComment(comment)") Delete
-              li
-                span(@click="messageInfoHandler(comment)") Message Info
+              li(@click="replyHandler(comment)") Reply
+              li(@click="confirmDeleteComment(comment)") Delete
+              li(@click="messageInfoHandler(comment)") Message Info
 
           //- CommentType: "location"
           static-map(:lat="comment.payload.latitude"
@@ -274,9 +271,8 @@ export default {
       this.$toasted.clear();
       if (comment.isFailed) return this.deleteLocalComment(comment);
       const roomId = this.core.selected.id;
-      // const commentIds = [comment.unique_id];
-      // return this.core.deleteComment(roomId, commentIds, isForEveryone, true);
-      return this.core.deleteComment(roomId, [-1], isForEveryone, true);
+      const commentIds = [comment.unique_id];
+      return this.core.deleteComment(roomId, commentIds, isForEveryone, true);
     },
     deleteLocalComment(comment) {
       const comments = this.core.selected.comments;
