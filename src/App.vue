@@ -1,23 +1,28 @@
 <template lang="pug">
   .qcw-container(:class="{'qcw-container--open': chatWindowStatus, 'qcw-container--wide': core.mode=='wide'}")
+    notification-bubble(v-if="!chatWindowStatus" :count="getNotificationCount")
     chat-window(v-if="core.isInit" :core="core" :toggleWindowStatus="toggleWindowStatus")
     div(v-if="!core.isInit" class="qcw-connecting-indicator") Connecting to chat server ...
     qcw-trigger(:clickHandler="toggleWindowStatus" :core="core" :label="widgetButtonText")
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import QiscusCore from './lib/SDKCore';
 import QcwTrigger from './components/QcwTrigger';
 import ChatWindow from './components/ChatWindow';
+import NotificationBubble from './components/NotificationBubble';
 import { focusMessageForm, scrollIntoElement, scrollIntoLastElement } from './lib/utils';
 
 export default {
   name: 'app',
   components: {
-    QcwTrigger,
     ChatWindow,
+    QcwTrigger,
+    NotificationBubble,
   },
   computed: {
+    ...mapGetters(['getNotificationCount']),
     widgetButtonText: () => QiscusCore.UI.widgetButtonText,
   },
   data() {
@@ -112,6 +117,16 @@ export default {
       },
     };
     window.QiscusUI = self.core.UI;
+
+    self.$core.on('login-success', (response) => {
+      self.$store.dispatch('setUser', response.results.user);
+    });
+
+    self.$core.on('newmessages', (messages) => {
+      if (!this.chatWindowStatus || !document.hasFocus()) {
+        self.$store.dispatch('addNewMessage', messages[0]);
+      }
+    });
   },
   methods: {
     toggleWindowStatus() {
@@ -122,6 +137,11 @@ export default {
       }
       if (!this.chatWindowStatus && this.roomId) QiscusUI.chatGroup(this.roomId);
       this.chatWindowStatus = !this.chatWindowStatus;
+
+      if (this.chatWindowStatus) {
+        this.$store.dispatch('resetNotificationCount');
+      }
+    },
     },
   },
 };

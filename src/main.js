@@ -2,6 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import Toasted from 'vue-toasted';
+import store from '@/store';
 import QiscusWidget from './App';
 import QiscusCore from './lib/SDKCore';
 
@@ -16,6 +17,7 @@ Vue.prototype.$core = QiscusCore;
 function renderSDK() {
   /* eslint-disable no-new */
   new Vue({
+    store,
     render(h) {
       return h(QiscusWidget);
     },

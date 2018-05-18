@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "qiscus-sdk-core": "git://github.com/qiscus/qiscus-sdk-web-core.git",
-    "vue-toasted": "^1.1.22"
+    "vue-toasted": "^1.1.22",
+    "vuex": "^3.0.1"
   },
   "devDependencies": {
     "@vue/test-utils": "^1.0.0-beta.15",
