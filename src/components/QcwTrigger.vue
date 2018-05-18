@@ -14,7 +14,7 @@ export default {
   },
   mounted() {
     this.buttonStyle = {
-      background: QiscusUI.colors.widgetButtonBackgroundColor,
+      background: this.core.UI.colors.widgetButtonBackgroundColor,
     };
   },
 };
