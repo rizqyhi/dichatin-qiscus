@@ -25,11 +25,18 @@ export default {
     ...mapGetters(['getNotificationCount']),
     widgetButtonText: () => QiscusCore.UI.widgetButtonText,
   },
+  watch: {
+    getNotificationCount: function getNotificationCountWatcher(val) {
+      this.startFlashTitleNotification(val);
+      this.playNotificationSound(val);
+    },
+  },
   data() {
     return {
       core: QiscusCore,
       chatWindowStatus: false,
       roomId: null,
+      originalWindowTitle: document.title,
     };
   },
   created() {
@@ -127,6 +134,14 @@ export default {
         self.$store.dispatch('addNewMessage', messages[0]);
       }
     });
+
+    window.addEventListener('focus', () => {
+      this.stopFlashTitleNotification();
+
+      if (this.chatWindowStatus) {
+        self.$store.dispatch('resetNotificationCount');
+      }
+    });
   },
   methods: {
     toggleWindowStatus() {
@@ -141,6 +156,24 @@ export default {
       if (this.chatWindowStatus) {
         this.$store.dispatch('resetNotificationCount');
       }
+    },
+    startFlashTitleNotification(notificationCount) {
+      const intervalSpeed = 1000;
+      const notificationTitle = `${notificationCount} Pesan Baru`;
+
+      this.stopFlashTitleNotification();
+
+      if (document.hasFocus()) return;
+
+      this.interval = setInterval(() => {
+        document.title = (this.originalWindowTitle === document.title)
+          ? notificationTitle
+          : this.originalWindowTitle;
+      }, intervalSpeed);
+    },
+    stopFlashTitleNotification() {
+      clearInterval(this.interval);
+      document.title = this.originalWindowTitle;
     },
     },
   },
