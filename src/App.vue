@@ -1,6 +1,7 @@
 <template lang="pug">
   .qcw-container(:class="{'qcw-container--open': chatWindowStatus, 'qcw-container--wide': core.mode=='wide'}")
     notification-bubble(v-if="!chatWindowStatus" :count="getNotificationCount")
+    notification-sound(:play="shouldPlayNotificationSound")
     chat-window(v-if="core.isInit" :core="core" :toggleWindowStatus="toggleWindowStatus")
     div(v-if="!core.isInit" class="qcw-connecting-indicator") Connecting to chat server ...
     qcw-trigger(:clickHandler="toggleWindowStatus" :core="core" :label="widgetButtonText")
@@ -12,6 +13,7 @@ import QiscusCore from './lib/SDKCore';
 import QcwTrigger from './components/QcwTrigger';
 import ChatWindow from './components/ChatWindow';
 import NotificationBubble from './components/NotificationBubble';
+import NotificationSound from './components/NotificationSound';
 import { focusMessageForm, scrollIntoElement, scrollIntoLastElement } from './lib/utils';
 
 export default {
@@ -20,6 +22,7 @@ export default {
     ChatWindow,
     QcwTrigger,
     NotificationBubble,
+    NotificationSound,
   },
   computed: {
     ...mapGetters(['getNotificationCount']),
@@ -37,6 +40,7 @@ export default {
       chatWindowStatus: false,
       roomId: null,
       originalWindowTitle: document.title,
+      shouldPlayNotificationSound: false,
     };
   },
   created() {
@@ -175,6 +179,14 @@ export default {
       clearInterval(this.interval);
       document.title = this.originalWindowTitle;
     },
+    playNotificationSound(notificationCount) {
+      if (notificationCount < 1) return;
+
+      this.shouldPlayNotificationSound = true;
+      this.notificationSoundInterval = setTimeout(() => {
+        this.shouldPlayNotificationSound = false;
+        clearTimeout(this.notificationSoundInterval);
+      }, 1000);
     },
   },
 };
