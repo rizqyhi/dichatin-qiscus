@@ -26,7 +26,6 @@ describe('Flashing tab title notification', () => {
         currentUser: currentUserModule,
       },
     });
-    wrapper = shallow(App, { localVue, store, mocks, attachToDocument: true });
 
     store.dispatch('setUser', { id: 1 });
   });
@@ -40,6 +39,7 @@ describe('Flashing tab title notification', () => {
       document.title = 'Dicoding';
       document.hasFocus = () => true;
 
+      wrapper = shallow(App, { localVue, store, mocks, attachToDocument: true });
       store.dispatch('addNewMessage', { id: 124, user_id: 2, unix_timestamp: 1526002765, message: 'hai juga' });
 
       expect(document.title).to.be.equal('Dicoding');
@@ -53,6 +53,7 @@ describe('Flashing tab title notification', () => {
       document.title = 'Dicoding';
       document.hasFocus = () => false;
 
+      wrapper = shallow(App, { localVue, store, mocks, attachToDocument: true });
       store.dispatch('addNewMessage', { id: 124, user_id: 2, unix_timestamp: 1526002765, message: 'hai juga' });
 
       expect(document.title).to.be.equal('Dicoding');
@@ -68,6 +69,7 @@ describe('Flashing tab title notification', () => {
       document.title = 'Dicoding';
       document.hasFocus = () => false;
 
+      wrapper = shallow(App, { localVue, store, mocks, attachToDocument: true });
       const spy = sinon.spy();
       wrapper.setMethods({ stopFlashTitleNotification: spy });
       store.dispatch('addNewMessage', { id: 124, user_id: 2, unix_timestamp: 1526002765, message: 'hai juga' });
@@ -82,6 +84,7 @@ describe('Flashing tab title notification', () => {
       document.title = 'Dicoding';
       document.hasFocus = () => false;
 
+      wrapper = shallow(App, { localVue, store, mocks, attachToDocument: true });
       store.dispatch('addNewMessage', { id: 124, user_id: 2, unix_timestamp: 1526002765, message: 'hai juga' });
 
       const focusEvent = new Event('focus');
@@ -96,6 +99,7 @@ describe('Flashing tab title notification', () => {
       it('Qiscus App should dispatch reset notification count action', () => {
         document.hasFocus = () => false;
 
+        wrapper = shallow(App, { localVue, store, mocks, attachToDocument: true });
         const spy = sinon.spy(wrapper.vm.$store, 'dispatch');
         const focusEvent = new Event('focus');
 
