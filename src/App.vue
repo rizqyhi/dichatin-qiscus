@@ -2,6 +2,7 @@
   .qcw-container(:class="{'qcw-container--open': chatWindowStatus, 'qcw-container--wide': core.mode=='wide'}")
     notification-bubble(v-if="!chatWindowStatus" :count="getNotificationCount")
     notification-sound(:play="shouldPlayNotificationSound")
+    notification-favicon(:replace-favicon="shouldReplaceFaviconNotification")
     chat-window(v-if="core.isInit" :core="core" :toggleWindowStatus="toggleWindowStatus")
     div(v-if="!core.isInit" class="qcw-connecting-indicator") Connecting to chat server ...
     qcw-trigger(:clickHandler="toggleWindowStatus" :core="core" :label="widgetButtonText")
@@ -14,6 +15,7 @@ import QcwTrigger from './components/QcwTrigger';
 import ChatWindow from './components/ChatWindow';
 import NotificationBubble from './components/NotificationBubble';
 import NotificationSound from './components/NotificationSound';
+import NotificationFavicon from './components/NotificationFavicon';
 import { focusMessageForm, scrollIntoElement, scrollIntoLastElement } from './lib/utils';
 
 export default {
@@ -23,6 +25,7 @@ export default {
     QcwTrigger,
     NotificationBubble,
     NotificationSound,
+    NotificationFavicon,
   },
   computed: {
     ...mapGetters(['getNotificationCount']),
@@ -32,6 +35,7 @@ export default {
     getNotificationCount: function getNotificationCountWatcher(val) {
       this.startFlashTitleNotification(val);
       this.playNotificationSound(val);
+      this.replaceFaviconNotification(val);
     },
   },
   data() {
@@ -41,6 +45,7 @@ export default {
       roomId: null,
       originalWindowTitle: document.title,
       shouldPlayNotificationSound: false,
+      shouldReplaceFaviconNotification: false,
     };
   },
   created() {
@@ -143,6 +148,7 @@ export default {
       this.stopFlashTitleNotification();
 
       if (this.chatWindowStatus) {
+        this.restoreFaviconNotification();
         self.$store.dispatch('resetNotificationCount');
       }
     });
@@ -158,6 +164,7 @@ export default {
       this.chatWindowStatus = !this.chatWindowStatus;
 
       if (this.chatWindowStatus) {
+        this.restoreFaviconNotification();
         this.$store.dispatch('resetNotificationCount');
       }
     },
@@ -187,6 +194,14 @@ export default {
         this.shouldPlayNotificationSound = false;
         clearTimeout(this.notificationSoundInterval);
       }, 1000);
+    },
+    replaceFaviconNotification() {
+      if (!this.chatWindowStatus || !document.hasFocus()) {
+        this.shouldReplaceFaviconNotification = true;
+      }
+    },
+    restoreFaviconNotification() {
+      this.shouldReplaceFaviconNotification = false;
     },
   },
 };
